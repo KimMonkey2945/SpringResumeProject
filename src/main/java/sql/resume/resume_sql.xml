@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="resume">
+
+	<resultMap type="com.spring.resume.vo.RecruitVo" id="recruitVo">
+			<result property="seq" 	column="SEQ"/>
+			<result property="name" 	column="NAME"/>
+			<result property="birth" 	column="BIRTH"/>
+			<result property="gender" 	column="FIELD3"/>
+			<result property="phone" 	column="PHONE"/>
+			<result property="email" 	column="EMAIL"/>
+			<result property="addr" 	column="ADDR"/>
+			<result property="location" 	column="LOCATION"/>
+			<result property="workType" 	column="WORK_TYPE"/>
+			<result property="submit" 	column="SUBMIT"/>
+			
+	</resultMap>
+	
+	<resultMap type="com.spring.resume.vo.EducationVo" id="educationVo">
+			<result property="eduSeq" 	column="EDU_SEQ"/>
+			<result property="recruitEdSeq" 	column="SEQ"/>
+			<result property="edStartPeriod" 	column="START_PERIOD"/>
+			<result property="edEndPeriod" 	column="END_PERIOD"/>
+			<result property="division" 	column="DIVISION"/>
+			<result property="schoolName" 	column="SCHOOL_NAME"/>
+			<result property="edLocation" 	column="LOCATION"/>
+			<result property="major" 	column="MAJOR"/>
+			<result property="grade" 	column="GRADE"/>
+	</resultMap>
+	
+	<resultMap type="com.spring.resume.vo.CareerVo" id="careerVo">
+			<result property="carSeq" 	column="CAR_SEQ"/>
+			<result property="recruitCaSeq" 	column="SEQ"/>
+			<result property="caStartPeriod" 	column="START_PERIOD"/>
+			<result property="caEndPeriod" 	column="END_PERIOD"/>
+			<result property="compName" 	column="COMP_NAME"/>
+			<result property="task" 	column="TASK"/>
+			<result property="caLocation" 	column="LOCATION"/>
+			<result property="salary" 	column="SALARY"/>
+	</resultMap>
+	
+	<resultMap type="com.spring.resume.vo.CertificationVo" id="certificationVo">
+			<result property="certSeq" 	column="CERT_SEQ"/>
+			<result property="recruitCeSeq" 	column="SEQ"/>
+			<result property="qualifiName" 	column="QUALIFI_NAME"/>
+			<result property="acquDate" 	column="ACQU_DATE"/>
+			<result property="organizeName" 	column="ORGANIZE_NAME"/>
+	</resultMap>
+	
+	<resultMap type="com.spring.resume.dto.ResumeDTO" id="resumeDTO">
+	    <association property="recruit" javaType="com.spring.resume.vo.RecruitVo">
+	        <result property="seq" 	column="SEQ"/>
+			<result property="name" 	column="NAME"/>
+			<result property="birth" 	column="BIRTH"/>
+			<result property="gender" 	column="FIELD3"/>
+			<result property="phone" 	column="PHONE"/>
+			<result property="email" 	column="EMAIL"/>
+			<result property="addr" 	column="ADDR"/>
+			<result property="location" 	column="LOCATION"/>
+			<result property="workType" 	column="WORK_TYPE"/>
+			<result property="submit" 	column="SUBMIT"/>
+	    </association>
+	    <collection property="education" ofType="com.spring.resume.vo.EducationVo">
+			<result property="eduSeq" 	column="EDU_SEQ"/>
+			<result property="recruitEdSeq" 	column="SEQ"/>
+			<result property="edStartPeriod" 	column="START_PERIOD"/>
+			<result property="edEndPeriod" 	column="END_PERIOD"/>
+			<result property="division" 	column="DIVISION"/>
+			<result property="schoolName" 	column="SCHOOL_NAME"/>
+			<result property="edLocation" 	column="LOCATION"/>
+			<result property="major" 	column="MAJOR"/>
+			<result property="grade" 	column="GRADE"/>
+	    </collection>
+	    <collection property="career" ofType="com.spring.resume.vo.CareerVo">
+	        <result property="carSeq" 	column="CAR_SEQ"/>
+			<result property="recruitCaSeq" 	column="SEQ"/>
+			<result property="caStartPeriod" 	column="START_PERIOD"/>
+			<result property="caEndPeriod" 	column="END_PERIOD"/>
+			<result property="compName" 	column="COMP_NAME"/>
+			<result property="task" 	column="TASK"/>
+			<result property="caLocation" 	column="LOCATION"/>
+			<result property="salary" 	column="SALARY"/>
+	    </collection>
+	    <collection property="certification" ofType="com.spring.resume.vo.CertificationVo">
+	        <result property="certSeq" 	column="CERT_SEQ"/>
+			<result property="recruitCeSeq" 	column="SEQ"/>
+			<result property="qualifiName" 	column="QUALIFI_NAME"/>
+			<result property="acquDate" 	column="ACQU_DATE"/>
+			<result property="organizeName" 	column="ORGANIZE_NAME"/>
+	    </collection>
+	</resultMap>
+	
+	<!-- 이력서 저장  -->
+	<insert id="saveRecruit" parameterType="com.spring.resume.dto.ResumeDTO" >
+	
+		INSERT INTO RECRUIT (SEQ, NAME, BIRTH, FIELD3, PHONE, EMAIL, ADDR, LOCATION, WORK_TYPE, SUBMIT)
+		VALUES(#{recruit.seq}, #{recruit.name}, #{recruit.birth}, #{recruit.gender}, #{recruit.phone}, #{recruit.email}, #{recruit.addr}, #{recruit.location}, #{recruit.workType}, COALESCE(NULLIF(#{recruit.submit}, ''), '1'))
+	
+	</insert>
+
+	<update id="saveEd" parameterType="com.spring.resume.dto.ResumeDTO">
+	
+		<foreach collection="education" item="edu" index="index" separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
+		
+			INTO EDUCATION (EDU_SEQ, SEQ, SCHOOL_NAME, DIVISION, START_PERIOD, END_PERIOD, MAJOR, GRADE, LOCATION)
+			VALUES(#{edu.eduSeq}, #{edu.recruitEdSeq}, #{edu.schoolName}, #{edu.division}, #{edu.edStartPeriod}, #{edu.edEndPeriod}, #{edu.major}, #{edu.grade}, #{edu.edLocation})
+		
+		</foreach>
+		
+	</update>
+	
+	<update id="saveCa" parameterType="com.spring.resume.dto.ResumeDTO">
+	
+		<foreach collection="career" item="car" index="index" separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
+		
+			INTO CAREER (CAR_SEQ, SEQ, COMP_NAME, LOCATION, START_PERIOD, END_PERIOD, TASK, SALARY)
+			VALUES(#{car.carSeq}, #{car.recruitCaSeq}, #{car.compName}, #{car.caLocation}, #{car.caStartPeriod}, #{car.caEndPeriod}, #{car.task}, '회사내규에따름')
+		
+		</foreach>
+		
+	</update>
+	
+	<update id="saveCe" parameterType="com.spring.resume.dto.ResumeDTO">
+		
+		<foreach collection="certification" item="cer" index="index" separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
+		
+			INTO CERTIFICATE(CERT_SEQ, SEQ, QUALIFI_NAME, ACQU_DATE, ORGANIZE_NAME)
+			VALUES(#{cer.certSeq}, #{cer.recruitCeSeq}, #{cer.qualifiName}, #{cer.acquDate}, #{cer.organizeName})
+		
+		</foreach>	 
+	
+	</update>
+	
+	<select id="checkInfo" parameterType="java.util.Map" resultMap="recruitVo">
+		
+		SELECT NVL((SELECT SUBMIT FROM RECRUIT WHERE NAME = #{name} AND PHONE = #{phoneNum}), '0') AS SUBMIT
+		FROM DUAL
+	
+	</select>
+	
+	<!-- 이력서 불러오기  -->
+    <select id="selectRecruit" parameterType="java.util.Map" resultMap="recruitVo">
+        SELECT 
+            SEQ 
+            ,NAME 
+            ,BIRTH 
+            ,FIELD3 
+            ,PHONE 
+            ,EMAIL 
+            ,ADDR 
+            ,LOCATION 
+            ,WORK_TYPE 
+            ,SUBMIT 
+        FROM RECRUIT
+        WHERE NAME = #{name} AND PHONE = #{phoneNum}
+    </select>
+
+   <select id="selectEducation" parameterType="java.util.Map" resultMap="educationVo">
+       SELECT 
+            SEQ, 
+            EDU_SEQ,
+            SCHOOL_NAME,
+            DIVISION,
+            START_PERIOD,
+            END_PERIOD,
+            MAJOR,
+            GRADE,
+            LOCATION 
+        FROM (
+	        SELECT ED.SEQ, ED.EDU_SEQ, ED.SCHOOL_NAME, ED.DIVISION, ED.START_PERIOD, ED.END_PERIOD, ED.MAJOR, ED.GRADE, ED.LOCATION 
+	        FROM RECRUIT R 
+	        JOIN EDUCATION ED 
+	        ON R.SEQ = ED.SEQ 
+	        WHERE NAME=#{name} AND PHONE=#{phoneNum}
+        )
+    </select>
+
+    <select id="selectCareer" parameterType="java.util.Map" resultMap="careerVo">
+        SELECT 
+            SEQ 
+            ,CAR_SEQ 
+            ,COMP_NAME
+            ,LOCATION 
+            ,START_PERIOD 
+            ,END_PERIOD 
+            ,TASK
+            ,SALARY
+        FROM (
+	        SELECT CA.SEQ, CA.CAR_SEQ, CA.COMP_NAME, CA.LOCATION, CA.START_PERIOD, CA.END_PERIOD, CA.TASK, CA.SALARY
+	         FROM RECRUIT R 
+	         JOIN CAREER CA ON R.SEQ = CA.SEQ 
+	         WHERE NAME=#{name} AND PHONE=#{phoneNum}
+       	 	)
+    </select>
+
+    <select id="selectCertification" parameterType="java.util.Map" resultMap="certificationVo">
+       SELECT 
+            SEQ 
+            ,CERT_SEQ 
+            ,QUALIFI_NAME
+            ,ACQU_DATE
+            ,ORGANIZE_NAME
+        FROM (
+	        SELECT CE.SEQ, CE.CERT_SEQ, CE.QUALIFI_NAME, CE.ACQU_DATE, CE.ORGANIZE_NAME
+	         FROM RECRUIT R 
+	         JOIN CERTIFICATE CE ON R.SEQ = CE.SEQ
+	        WHERE NAME=#{name} AND PHONE=#{phoneNum}
+        	)
+    </select>
+    
+    <!-- seq 불러오기  -->
+    <select id="selectSeq" resultType="com.spring.resume.vo.SeqVo">
+		SELECT 
+		    (SELECT MAX(TO_NUMBER(SEQ)) FROM RECRUIT) AS SEQ,
+		    (SELECT MAX(TO_NUMBER(EDU_SEQ)) FROM EDUCATION) AS EDUSEQ,
+		    (SELECT MAX(TO_NUMBER(CAR_SEQ)) FROM CAREER) AS CARSEQ,
+		    (SELECT MAX(TO_NUMBER(CERT_SEQ)) FROM CERTIFICATE) AS CERTSEQ
+		FROM DUAL
+    </select>
+    
+    <!-- 기간계산하는  -->
+    <select id="selectPeriod" parameterType="java.util.Map" resultType="com.spring.resume.vo.PeriodVo">
+    	SELECT 
+    		 MONTHS_BETWEEN(TO_DATE(MAX(ED.END_PERIOD), 'YYYY-MM-DD'),(TO_DATE(MAX(ED.START_PERIOD), 'YYYY-MM-DD'))) EDUPERIOD
+	    	,MONTHS_BETWEEN(TO_DATE(MAX(CA.END_PERIOD), 'YYYY-MM-DD'),(TO_DATE(MIN(CA.START_PERIOD), 'YYYY-MM-DD'))) CARPERIOD
+	    	,ED.DIVISION DIVISION
+	    	,ED.SCHOOL_NAME SCHOOLNAME
+		FROM RECRUIT R
+			JOIN EDUCATION ED
+			ON R.SEQ = ED.SEQ
+			JOIN CAREER CA
+			ON R.SEQ = CA.SEQ
+		WHERE NAME=#{name} AND PHONE=#{phoneNum}
+		AND ED.END_PERIOD = (
+						      	SELECT MAX(ED2.END_PERIOD)
+								FROM EDUCATION ED2
+								WHERE ED2.SEQ = ED.SEQ
+						  )
+		GROUP BY R.SEQ, ED.DIVISION, ED.SCHOOL_NAME
+		FETCH FIRST 1 ROWS ONLY
+
+    </select>
+    
+    <!-- 저장된 폼 업데이트  -->
+    <update id="updateRecruit" parameterType="com.spring.resume.dto.ResumeDTO" >
+	
+		UPDATE RECRUIT
+		SET 
+		    NAME = #{recruit.name}
+		    ,BIRTH = #{recruit.birth}
+		    ,FIELD3 = #{recruit.gender}
+		    ,PHONE = #{recruit.phone}
+		    ,EMAIL = #{recruit.email}
+		    ,ADDR = #{recruit.addr}
+		    ,LOCATION = #{recruit.location}
+		    ,WORK_TYPE = #{recruit.workType}
+		    ,SUBMIT = #{recruit.submit}
+		WHERE 
+    	SEQ = #{recruit.seq}
+	
+	</update>
+
+	<update id="updateEd" parameterType="com.spring.resume.dto.ResumeDTO">
+	
+		<foreach collection="education" item="edu" separator=" " open="BEGIN" close="END;">
+		    MERGE INTO EDUCATION ED
+			USING (SELECT 
+			           #{edu.schoolName} AS SCHOOL_NAME
+			           ,#{edu.division} AS DIVISION
+			           ,#{edu.edStartPeriod} AS START_PERIOD
+			           ,#{edu.edEndPeriod} AS END_PERIOD
+			           ,#{edu.major} AS MAJOR
+			           ,#{edu.grade} AS GRADE
+			           ,#{edu.edLocation} AS LOCATION
+			           ,#{edu.recruitEdSeq} AS RECRUIT_EDSEQ
+			           ,#{edu.eduSeq} AS EDU_SEQ
+			       FROM dual) D
+			ON (ED.SEQ = D.RECRUIT_EDSEQ AND ED.EDU_SEQ = D.EDU_SEQ)
+			WHEN MATCHED THEN
+			    UPDATE SET 
+			        ED.SCHOOL_NAME = D.SCHOOL_NAME,
+			        ED.DIVISION = D.DIVISION,
+			        ED.START_PERIOD = D.START_PERIOD,
+			        ED.END_PERIOD = D.END_PERIOD,
+			        ED.MAJOR = D.MAJOR,
+			        ED.GRADE = D.GRADE,
+			        ED.LOCATION = D.LOCATION
+			WHEN NOT MATCHED THEN
+			    INSERT (SEQ, EDU_SEQ, SCHOOL_NAME, DIVISION, START_PERIOD, END_PERIOD, MAJOR, GRADE, LOCATION)
+			    VALUES (D.RECRUIT_EDSEQ, D.EDU_SEQ, D.SCHOOL_NAME, D.DIVISION, D.START_PERIOD, D.END_PERIOD, D.MAJOR, D.GRADE, D.LOCATION);
+		</foreach>
+		
+	</update>
+	
+	<update id="updateCa" parameterType="com.spring.resume.dto.ResumeDTO">
+	
+		<foreach collection="career" item="car" separator=" " open="BEGIN" close="END;">
+			MERGE INTO CAREER CA
+			USING (SELECT
+						#{car.carSeq} AS CAR_SEQ
+					   ,#{car.recruitCaSeq} AS SEQ 
+			           ,#{car.compName} AS COMP_NAME
+			           ,#{car.caLocation} AS LOCATION
+			           ,#{car.caStartPeriod} AS START_PERIOD
+			           ,#{car.caEndPeriod} AS END_PERIOD
+			           ,#{car.task} AS TASK
+			           ,#{car.salary} AS SALARY
+			       FROM dual) A
+			ON (CA.SEQ = A.SEQ AND CA.CAR_SEQ = A.CAR_SEQ)
+			WHEN MATCHED THEN
+			    UPDATE SET 
+			        CA.COMP_NAME = A.COMP_NAME
+			        ,CA.LOCATION = A.LOCATION
+			        ,CA.START_PERIOD = A.START_PERIOD
+			        ,CA.END_PERIOD = A.END_PERIOD
+			        ,CA.TASK = A.TASK
+			        ,CA.SALARY = A.SALARY
+			WHEN NOT MATCHED THEN
+			    INSERT (SEQ, CAR_SEQ, COMP_NAME, START_PERIOD, END_PERIOD, TASK, SALARY)
+			    VALUES (A.SEQ, A.CAR_SEQ, A.COMP_NAME, A.START_PERIOD, A.END_PERIOD, A.TASK, '회사내규에따름');
+		</foreach>
+		
+	</update>
+	
+	<update id="updateCe" parameterType="com.spring.resume.dto.ResumeDTO">
+		
+		<foreach collection="certification" item="cer" separator=" " open="BEGIN" close="END;">
+			MERGE INTO CERTIFICATE CE
+			USING (SELECT
+						#{cer.certSeq} AS CERT_SEQ
+					   ,#{cer.recruitCeSeq} AS SEQ 
+			           ,#{cer.qualifiName} AS QUALIFI_NAME
+			           ,#{cer.acquDate} AS ACQU_DATE
+			           ,#{cer.organizeName} AS ORGANIZE_NAME
+			       FROM dual) E
+			ON (CE.SEQ = E.SEQ AND CE.CERT_SEQ = E.CERT_SEQ)
+			WHEN MATCHED THEN
+			    UPDATE SET 
+			         CE.QUALIFI_NAME = E.QUALIFI_NAME
+			        ,CE.ACQU_DATE = E.ACQU_DATE
+			        ,CE.ORGANIZE_NAME = E.ORGANIZE_NAME
+			WHEN NOT MATCHED THEN
+			    INSERT (SEQ, CERT_SEQ, QUALIFI_NAME, ACQU_DATE, ORGANIZE_NAME)
+			    VALUES (E.SEQ, E.CERT_SEQ, E.QUALIFI_NAME, E.ACQU_DATE, E.ORGANIZE_NAME);
+		</foreach>	 
+	
+	</update>
+	
+	<!-- 삭제 -->
+	
+	<delete id="deleteEducation" parameterType="com.spring.resume.dto.ResumeDTO">
+		<foreach collection="education" item="edu" separator=";" open="DECLARE BEGIN" close="; END;">
+			DELETE FROM EDUCATION WHERE EDU_SEQ = #{edu.eduSeq}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteCareer" parameterType="com.spring.resume.dto.ResumeDTO">
+		<foreach collection="career" item="car" separator=";" open="DECLARE BEGIN" close="; END;">
+			DELETE FROM CAREER WHERE CAR_SEQ = #{car.carSeq}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteCertification" parameterType="com.spring.resume.dto.ResumeDTO">
+		<foreach collection="certification" item="cer" separator=";" open="DECLARE BEGIN" close="; END;">
+			DELETE FROM CERTIFICATE WHERE CERT_SEQ = #{cer.certSeq}
+		</foreach>
+	</delete>
+    
+    
+    
+
+
+</mapper>
