@@ -24,6 +24,16 @@
 			this.value = this.value.replace(/[^0-9]/g, '').substring(0,8);
 		});
 		
+		$('#birth').on('keyup', function(){
+		    var cleaned = this.value.replace(/[^0-9]/g, '');
+		    cleaned = cleaned.substring(0, 6);
+		    
+		    if (cleaned.length >= 4) {
+		        cleaned = cleaned.substring(0, 2) + '.' + cleaned.substring(2, 4) + '.' + cleaned.substring(4);
+		    }
+		    this.value = cleaned;
+		});
+		
 		function isValidEmail(email) {
 		    var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 		    return emailRegex.test(email);
@@ -42,6 +52,12 @@
 		$('#addr').on('keyup', function(){
 			this.value = this.value.replace( /[^\w가-힣-]/g, '').substring(0,84);
 		});
+				
+		$('#task').on('focus', function() {
+			if ($(this).val().trim() === '') {
+	            $(this).val('부서 / 직급 / 직책 ');
+	        }
+	 	});
 		
 		$(document).on('change', '#edStartPeriod', function() {
 		    var startDate = $(this).val();
@@ -52,24 +68,64 @@
 		    
 		    // edEndPeriod의 선택된 날짜가 edStartPeriod보다 작은 경우, edEndPeriod를 초기화합니다.
 		    var endDate = $edEndPeriod.val();
-		    if (endDate < startDate) {
+		    if (endDate > startDate) {
 		        $edEndPeriod.val('');
 		    }
 		});
 
 		$(document).on('change', '#caStartPeriod', function() {
 		    var startDate = $(this).val();
+		    
 		    var $caEndPeriod = $(this).closest('tr').find('#caEndPeriod');
+		    var $caStartPeriod = $(this).closest('tr').find('#caStartPeriod');
+		    $caStartPeriod.attr('min', startDate);
 		    
 		    // caStartPeriod의 선택된 날짜 다음날부터만 선택 가능하도록 설정합니다.
 		    $caEndPeriod.attr('min', startDate);
 		    
 		    // caEndPeriod의 선택된 날짜가 caStartPeriod보다 작은 경우, caEndPeriod를 초기화합니다.
 		    var endDate = $caEndPeriod.val();
-		    if (endDate < startDate) {
+		    if (endDate > startDate) {
 		        $caEndPeriod.val('');
 		    }
 		});
+		
+		$(document).on('change', '#caStartPeriod', function() {
+		    var $row = $(this).closest('tr');
+		    var $caStartPeriod = $(this);
+		    var $caEndPeriod = $row.find('#caEndPeriod');
+		    var caStartVal = $caStartPeriod.val();
+		    var edEndVal = $('#edEndPeriod').val();
+		    
+		    // 학력 종료일 이후로 설정된 경력 시작일 검사
+		    if (new Date(caStartVal) < new Date(edEndVal)) {
+		        alert('새로 추가된 경력의 시작일은 학력 종료일 이후여야 합니다.');
+		        $caStartPeriod.val('');
+		        return false;
+		    }
+		
+		    // 다른 경력의 시작일과 종료일과 비교하여 겹치지 않도록 검사
+		    $('tr').not($row).each(function() {
+		        var $existingCaStart = $(this).find('#caStartPeriod');
+		        var $existingCaEnd = $(this).find('#caEndPeriod');
+		        var existingCaStartVal = $existingCaStart.val();
+		        var existingCaEndVal = $existingCaEnd.val();
+		
+		        if (existingCaEndVal && new Date(caStartVal) < new Date(existingCaEndVal)) {
+		            alert('새로 추가된 경력의 시작일은 다른 경력의 종료일 이후여야 합니다.');
+		            $caStartPeriod.val('');
+		            return false; // 검사 실패로 중단
+		        }
+		
+		        if (existingCaStartVal && new Date(caStartVal) < new Date(existingCaStartVal)) {
+		            alert('새로 추가된 경력의 시작일은 다른 경력의 시작일 이후여야 합니다.');
+		            $caStartPeriod.val('');
+		            return false; // 검사 실패로 중단
+		        }
+		    });
+		});
+
+
 
 	    
 	    
@@ -317,21 +373,25 @@
 		            if ($row.find('#edEndPeriod').val() === '') {
 		                alert('재학기간을 입력해주세요.');
 		                isValid = false;
+		                $row.find('#edEndPeriod').focus();
 		                return false; // each 함수를 종료하기 위해 false 반환
 		            }
 		            if ($row.find('#schoolName').val() === '') {
 		                alert('학교이름을 입력해주세요.');
 		                isValid = false;
+		                $row.find('#schoolName').focus();
 		                return false; 
 		            }
 		            if ($row.find('#major').val() === '') {
 		                alert('전공을 입력해주세요.');
 		                isValid = false;
+		                $row.find('#major').focus();
 		                return false; 
 		            }
 		            if ($row.find('#grade').val() === '') {
 		                alert('학점을 입력해주세요.');
 		                isValid = false;
+		                $row.find('#grade').focus();
 		                return false; 
 		            }
 		        }
@@ -348,19 +408,38 @@
 		        var $row = $caStartPeriod.closest('tr');
 
 		        if ($caStartPeriod.val() !== '') {
+		        	if ($row.find('#caEndPeriod').val() === '') {
+		                alert('근무기간을 입력해주세요.');
+		                isValid = false;
+		                $row.find('#caEndPeriod').focus();
+		                return false; // each 함수를 종료하기 위해 false 반환
+		            }
 		            if ($row.find('#compName').val() === '') {
 		                alert('회사이름을 입력해주세요.');
 		                isValid = false;
+		                $row.find('#compName').focus();
 		                return false; // each 함수를 종료하기 위해 false 반환
 		            }
 		            if ($row.find('#task').val() === '') {
 		                alert('부서/직급/직책을 입력해주세요.');
 		                isValid = false;
+		                $row.find('#task').focus();
 		                return false; 
 		            }
+		            
+		            var inputValue = $row.find('#task').val().trim();
+		            var slashCount = (inputValue.match(/\//g) || []).length;
+		            if (slashCount !== 2) {
+		                alert('부서/직급/직책 형식으로 입력해주세요.');
+		                isValid = false;
+		                $row.find('#task').focus();
+		                return false;
+		            }
+		            
 		            if ($row.find('#caLocation').val() === '') {
 		                alert('근무지역을 입력해주세요.');
 		                isValid = false;
+		                $row.find('#caLocation').focus();
 		                return false; 
 		            }
 		        }
@@ -380,11 +459,13 @@
 		            if ($row.find('#acquDate').val() === '') {
 		                alert('취득일을 입력해주세요.');
 		                isValid = false;
+		                $row.find('#acquDate').focus();
 		                return false; // each 함수를 종료하기 위해 false 반환
 		            }
 		            if ($row.find('#organizeName').val() === '') {
 		                alert('발행처를 입력해주세요.');
 		                isValid = false;
+		                $row.find('#organizeName').focus();
 		                return false; 
 		            }
 		        }
@@ -420,8 +501,13 @@
 	 			$('#edStartPeriod').focus();
 	 			return false;
 	 		}
-	 		
-	 		if (!validateEduTableInputs()) {
+	 	    var birth = $('#birth').val();
+	 	    if (birth.length !== 8) {
+	 	        alert('생년월일을 다시 입력해주세요 ex) 12.01.14');
+				return;
+	 	    }
+
+			if (!validateEduTableInputs()) {
 	 	        return false;
 	 	    }
 			if (!validateCarTableInputs()) {
@@ -474,7 +560,7 @@
 		
 	    $(document).on('click', '#submit', function() {
 	    	
-	    	if($('#name').val() == ""){
+			if($('#name').val() == ""){
 	 			alert('이름을 입력해주세요.');
 	 			$('#name').focus();
 	 			return false;
@@ -499,7 +585,13 @@
 	 			$('#edStartPeriod').focus();
 	 			return false;
 	 		}
-	 		if (!validateEduTableInputs()) {
+	 	    var birth = $('#birth').val();
+	 	    if (birth.length !== 8) {
+	 	        alert('생년월일을 다시 입력해주세요 ex) 12.01.14');
+				return;
+	 	    }
+
+			if (!validateEduTableInputs()) {
 	 	        return false;
 	 	    }
 			if (!validateCarTableInputs()) {
@@ -511,9 +603,9 @@
 	 		
 	 		if (isValidEmail($('#email').val())) {
 	  		}else {
- 		       alert('이메일 형식이 틀립니다 : ex)이메일주소@email.com ');
- 		     $('#email').focus()
- 		       return; 
+  		       alert('이메일 형식이 틀립니다 : ex)아이디@email.com ');
+  		     $('#email').focus()
+  		       return; 
 	  		}
 			
 			var name = $('#name').val();
@@ -610,7 +702,7 @@
 			str +=		"<td>"
 			str +=			"<input id='compName' name='compName'/>"
 			str +=		"</td>"
-			str +=		"<td><input id='task' name='task'/></td>"
+			str +=		"<td><input id='task' name='task' placeholder='부서 / 직급 / 직책'/></td>"
 			str +=		"<td><input id='caLocation' name='caLocation'/></td>"
 			str +=	"</tr>"
 			
@@ -844,7 +936,7 @@
 			            <td>
 			                <input id="compName" name="compName" value="" />
 			            </td>
-			            <td><input id="task" name="task" value="" /></td>
+			            <td><input id="task" name="task" value=""  placeholder="부서 / 직급 / 직책"//></td>
 			            <td><input id="caLocation" name="caLocation" value="" /></td>
 			        </tr>
 			    </c:when>

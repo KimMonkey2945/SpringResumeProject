@@ -54,32 +54,42 @@
 		});
 		
 		$('#edStartPeriod').on('change', function() {
-		        var startDate = $(this).val();
-		        
-		        // edStartPeriod의 선택된 날짜 다음날부터만 선택 가능하도록 설정합니다.
-		        $('#edEndPeriod').attr('min', startDate);
-		        
-		        // edEndPeriod의 선택된 날짜가 edStartPeriod보다 작은 경우, edEndPeriod를 초기화합니다.
-		        var endDate = $('#edEndPeriod').val();
-		        if (endDate < startDate) {
-		            $('#edEndPeriod').val('');
-		        }
-		 });
-		
-		$('#caStartPeriod').on('change', function() {
 	        var startDate = $(this).val();
 	        
-	        // edStartPeriod의 선택된 날짜 다음날부터만 선택 가능하도록 설정합니다.
-	        $('#caEndPeriod').attr('min', startDate);
+	        $('#edEndPeriod').attr('min', startDate);
+	        
 	        var endDate = $('#edEndPeriod').val();
-	        if (endDate < startDate) {
+	        if (endDate > startDate) {
 	            $('#edEndPeriod').val('');
 	        }
-	        
 	 	});
 		
-		$('#task').on('change', function() {
-	        
+		$('#edEndPeriod').on('change', function() {
+			  var endDate = $(this).val();
+	 	      $('#caStartPeriod').attr('min', endDate); 
+		});
+			
+		$('#caStartPeriod').on('change', function() {  	    
+ 		    var startDateStr = $(this).val();
+ 		    $('#caEndPeriod').attr('min', startDateStr); 
+			
+ 		    var caEndDateStr = $('#caEndPeriod').val(); 
+		    
+		    if (caEndDateStr) {
+		        var endDate = new Date(endDateStr); 
+		        var caEndDate = new Date(caEndDateStr); 
+		        
+		        if (caEndDate < endDate) { 
+ 		            $('#caEndPeriod').val('');
+		        }
+		    }
+		}); 
+
+		
+		$('#task').on('focus', function() {
+			if ($(this).val().trim() === '') {
+	            $(this).val('부서 / 직급 / 직책 ');
+	        }
 	 	});
 		
 		jQuery.fn.serializeAll = function(){
@@ -238,6 +248,16 @@
 		                $row.find('#task').focus();
 		                return false; 
 		            }
+		            
+		            var inputValue = $row.find('#task').val().trim();
+		            var slashCount = (inputValue.match(/\//g) || []).length;
+		            if (slashCount !== 2) {
+		                alert('부서/직급/직책 형식으로 입력해주세요.');
+		                isValid = false;
+		                $row.find('#task').focus();
+		                return false;
+		            }
+		            
 		            if ($row.find('#caLocation').val() === '') {
 		                alert('근무지역을 입력해주세요.');
 		                isValid = false;
@@ -493,7 +513,7 @@
 			str +=		"<td>"
 			str +=			"<input id='compName' name='compName'/>"
 			str +=		"</td>"
-			str +=		"<td><input id='task' name='task'/></td>"
+			str +=		"<td><input id='task' name='task' placeholder='부서 / 직급 / 직책'/></td>"
 			str +=		"<td><input id='caLocation' name='caLocation'/></td>"
 			str +=	"</tr>"
 			
@@ -664,7 +684,7 @@
 				<td>
 					<input id="compName" name="compName"/>
 				</td>
-				<td><input id="task" name="task"/></td>
+				<td><input id="task" name="task" placeholder="부서 / 직급 / 직책"/></td>
 				<td><input id="caLocation" name="caLocation"/></td>
 			</tr>
 		
