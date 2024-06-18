@@ -46,15 +46,18 @@ public class ResumeController {
 		requestData.put("phoneNum", data.get("rPhoneNum"));
 		
 		RecruitVo submit = resumeService.checkInfo(requestData);
-//		logger.info("submit.getSubmit() : " + submit.getSubmit());
-
-//		이름과 번호를 가져와서 체크하면, 저장화면 및 제출화면에 맞게 이동
-		if("0".equals(submit.getSubmit())) {
-			response.put("success", "/resumeForm.do");
-		}else if("1".equals(submit.getSubmit())) {
-			response.put("success", "/saveResumeForm.do");
+		RecruitVo dupli = resumeService.dupliCheck(requestData);
+		logger.info("dupli" + dupli);
+		if(dupli == null) {
+			if("0".equals(submit.getSubmit())) {
+				response.put("success", "/resumeForm.do");
+			}
+		}else if(dupli != null && "1".equals(submit.getSubmit())) {
+				response.put("success", "/saveResumeForm.do");
+		}else if(dupli != null && "2".equals(submit.getSubmit())){
+				response.put("success", "/submit.do");
 		}else {
-			response.put("success", "/submit.do");
+			response.put("dupli", "이미 등록된 번호입니다.");
 		}
 		
 		return response;
@@ -86,9 +89,9 @@ public class ResumeController {
 		
 		Map<String, String> response = new HashMap<String, String>();
 		int result = resumeService.insertResume(resumeDTO);
-		if(result == 4) {
-			response.put("success", "저장완료");
-		}
+//		if(result == 4) {
+//			response.put("success", "저장완료");
+//		}
 				
 		return response;
 	}

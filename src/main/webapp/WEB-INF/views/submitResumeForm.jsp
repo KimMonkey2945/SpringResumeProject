@@ -22,7 +22,7 @@
 <body>
 	
 	<h1>입사지원서</h1>
-
+	<a href="/login.do" style="float: right; text-align: right;">HOME</a>
 	<form id="resumeForm">
 		<table border="1">
 
@@ -161,9 +161,9 @@
 						<input type="hidden" id="recruitCaSeq" name="recruitCaSeq" value="${car.recruitCaSeq}">
 						<input type="hidden" id="salary" name="salary" value="${car.salary}">		
 						<td>
-							<input type="date" id="caStartPeriod" name="caStartPeriod" value="${car.caStartPeriod}" />
+							<input type="month" id="caStartPeriod" name="caStartPeriod" value="${car.caStartPeriod}" />
 							~
-							<input type="date" id="caEndPeriod" name="caEndPeriod" value="${car.caEndPeriod}"/>
+							<input type="month" id="caEndPeriod" name="caEndPeriod" value="${car.caEndPeriod}"/>
 						</td>
 						<td>
 							<input id="compName" name="compName" value="${car.compName}"/>

@@ -11,6 +11,8 @@ import com.spring.resume.vo.SeqVo;
 public interface ResumeService {
 
 	public int insertResume(ResumeDTO resume);
+	
+	public RecruitVo dupliCheck(Map<String, String> requestDate);
 
 	public RecruitVo checkInfo(Map<String, String> requestData);
 

@@ -21,6 +21,10 @@ public class ResumeServiceImpl implements ResumeService{
 	public int insertResume(ResumeDTO resume) {
 		return resumeDAO.insertResume(resume);
 	}
+	
+	public RecruitVo dupliCheck(Map<String, String> requestDate) {
+		return resumeDAO.dupliCheck(requestDate);
+	}
 
 	public RecruitVo checkInfo(Map<String, String> requestData) {
 		return resumeDAO.checkInfo(requestData);
@@ -46,7 +50,6 @@ public class ResumeServiceImpl implements ResumeService{
 		resumeDAO.delete(resumeDTO);
 		
 	}
-	
 	
 
 }

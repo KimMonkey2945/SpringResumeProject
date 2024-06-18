@@ -23,6 +23,16 @@
 		    }
 			this.value = value;
 		});
+		
+		var phoneInput = $('#phoneNum');
+	    phoneInput.val('010');
+
+	    phoneInput.focus(function() {
+	        setTimeout(function() {
+	            phoneInput[0].setSelectionRange(phoneInput.val().length, phoneInput.val().length);
+	        }, 0);
+	 	});
+		
 			
 		
 		$('#submit').on('click', function(){
@@ -38,11 +48,16 @@
 				$('#name').focus();
 				return false;
 			}
-			if( phoneNum == "" && name != ""){
-				alert('전화번호를 입력해주세요.');
-				$('#phoneNum').focus();
-				return false;
-			} else if(phoneNum.length < 13){
+			if (phoneNum == "" && name != "") {
+			        alert('전화번호를 입력해주세요.');
+			        $('#phoneNum').focus();
+			        // 포커스가 설정된 후 커서를 맨 뒤로 이동
+		            setTimeout(function() {
+		                phoneInput[0].setSelectionRange(phoneInput.val().length, phoneInput.val().length);
+		            }, 0);
+
+		            return false;
+		        }else if(phoneNum.length < 13){
 				alert('전화번호를 확인해주세요.');
 				$('#phoneNum').focus();
 				return false;
@@ -61,7 +76,12 @@
 				    success: function(response, textStatus, jqXHR)
 				    {
 	 	 			    console.log(response.success);
-						window.location.href=response.success +'?name=' + name + '&phoneNum=' + phoneNum;
+	 	 			    if(response.dupli != null){
+	 	 			    	alert(response.dupli)
+	 	 			    }else{
+	 	 			      window.location.href=response.success +'?name=' + name + '&phoneNum=' + phoneNum;   	
+	 	 			    }
+	 	 			 
 						
 				    },
 				    error: function (xhr, textStatus, error)
@@ -95,7 +115,7 @@
 		</tr>
 		<tr>
 			<td>휴대폰번호</td>
-			<td><input id="phoneNum" value="010"/></td>
+			<td><input id="phoneNum" value=""/></td>
 		</tr>
 		<tr>
 			<td align="center" colspan="2"><input id="submit" type="button" value="입사지원" /></td>

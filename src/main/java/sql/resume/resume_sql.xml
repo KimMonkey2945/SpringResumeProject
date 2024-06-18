@@ -90,6 +90,12 @@
 	    </collection>
 	</resultMap>
 	
+	<!-- 핸드폰번호 중복 -->
+	<select id="dupliCheck" parameterType="java.util.Map" resultMap="recruitVo">
+		SELECT * FROM RECRUIT WHERE PHONE = #{phoneNum} FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	
 	<!-- 이력서 저장  -->
 	<insert id="saveRecruit" parameterType="com.spring.resume.dto.ResumeDTO" >
 	
@@ -222,7 +228,7 @@
     <select id="selectPeriod" parameterType="java.util.Map" resultType="com.spring.resume.vo.PeriodVo">
     	SELECT 
     		 MONTHS_BETWEEN(TO_DATE(MAX(ED.END_PERIOD), 'YYYY-MM-DD'),(TO_DATE(MAX(ED.START_PERIOD), 'YYYY-MM-DD'))) EDUPERIOD
-	    	,MONTHS_BETWEEN(TO_DATE(MAX(CA.END_PERIOD), 'YYYY-MM-DD'),(TO_DATE(MIN(CA.START_PERIOD), 'YYYY-MM-DD'))) CARPERIOD
+	    	,MONTHS_BETWEEN(TO_DATE(MAX(CA.END_PERIOD), 'YYYY-MM'),(TO_DATE(MIN(CA.START_PERIOD), 'YYYY-MM'))) CARPERIOD
 	    	,ED.DIVISION DIVISION
 	    	,ED.SCHOOL_NAME SCHOOLNAME
 		FROM RECRUIT R

@@ -29,6 +29,10 @@ public class ResumeDAOImpl implements ResumeDAO {
 		result += sqlSession.insert("resume.saveCe", resume);
 		return result;
 	}
+	
+	public RecruitVo dupliCheck(Map<String, String> requestData) {
+		return sqlSession.selectOne("resume.dupliCheck", requestData);
+	}
 
 	public RecruitVo checkInfo(Map<String, String> requestData) {
 		return sqlSession.selectOne("resume.checkInfo", requestData);

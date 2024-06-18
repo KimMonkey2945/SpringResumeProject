@@ -12,6 +12,8 @@ public interface ResumeDAO {
 	
 	public int insertResume(ResumeDTO resume);
 
+	public RecruitVo dupliCheck(Map<String,String> requestDate);
+	
 	public RecruitVo checkInfo(Map<String, String> requestData);
 
 	public ResumeDTO selectSaveResume(Map<String, String> requestData);
