@@ -110,38 +110,76 @@
 				<td>전공</td>
 				<td>학점</td>
 			</tr>
-			<c:forEach var="edu" items="${education}">
-				<tr data-section="education">
-					<input type="hidden" id="eduSeq" name="eduSeq" value="${edu.eduSeq}" />
-					<input type="hidden" id="recruitEdSeq" name="recruitEdSeq" value="${recruit.seq}" />
-					<td>
-						<input type="date" id="edStartPeriod" name="edStartPeriod" value="${edu.edStartPeriod}"/>
-						~
-						<input type="date" id="edEndPeriod" name="edEndPeriod" value="${edu.edEndPeriod}"/>
-					</td>
-					<td>
-						<select id="division" name="division">
-							<option value="graduation" ${edu.division == 'graduation' ? 'selected' : ''}>졸업</option>
-							<option value="enrolled" ${edu.division == 'enrolled' ? 'selected' : ''}>재학</option>
-							<option value="dropout" ${edu.division == 'dropout' ? 'selected' : ''}>중퇴</option>
-						</select>
-					</td>
-					<td>
-						<input id="schoolName" value="${edu.schoolName}"/>
-						<select id="edLocation" name="edLocation">
-							<option value="서울" ${edu.edLocation == '서울' ? 'selected' : ''}>서울</option>
-							<option value="인천" ${edu.edLocation == '인천' ? '인천' : ''}>인천</option>
-							<option value="부산" ${edu.edLocation == '부산' ? '부산' : ''}>부산</option>
-							<option value="울산" ${edu.edLocation == '울산' ? '울산' : ''}>울산</option>
-							<option value="광주" ${edu.edLocation == '광주' ? '광주' : ''}>광주</option>
-							<option value="대구" ${edu.edLocation == '대구' ? '대구' : ''}>대구</option>
-							<option value="대전" ${edu.edLocation == '대전' ? '대전' : ''}>대전</option>
-						</select>
-					</td>
-					<td><input id="major" name="major" value="${edu.major}"/></td>
-					<td><input id="grade" name="grade" value="${edu.grade}"/></td>
-				</tr>
-			</c:forEach>
+			<c:choose>
+			    <c:when test="${empty education}">
+			        <tr data-section="education">
+			            <input type="hidden" id="eduSeq" name="eduSeq" value="" />
+			            <input type="hidden" id="recruitEdSeq" name="recruitEdSeq" value="${recruit.seq}" />
+			            <td><input class="educheck" type="checkbox"/></td>
+			            <td>
+			                <input type="date" id="edStartPeriod" name="edStartPeriod" value=""/>
+			                ~
+			                <input type="date" id="edEndPeriod" name="edEndPeriod" value=""/>
+			            </td>
+			            <td>
+			                <select id="division" name="division">
+			                    <option value="졸업">졸업</option>
+			                    <option value="재학">재학</option>
+			                    <option value="중퇴">중퇴</option>
+			                </select>
+			            </td>
+			            <td>
+			                <input id="schoolName" value=""/>
+			                <select id="edLocation" name="edLocation">
+			                    <option value="서울">서울</option>
+			                    <option value="인천">인천</option>
+			                    <option value="부산">부산</option>
+			                    <option value="울산">울산</option>
+			                    <option value="광주">광주</option>
+			                    <option value="대구">대구</option>
+			                    <option value="대전">대전</option>
+			                </select>
+			            </td>
+			            <td><input id="major" name="major" value=""/></td>
+			            <td><input id="grade" name="grade" value=""/></td>
+			        </tr>
+			    </c:when>
+			    <c:otherwise>
+					<c:forEach var="edu" items="${education}">
+						<tr data-section="education">
+							<input type="hidden" id="eduSeq" name="eduSeq" value="${edu.eduSeq}" />
+							<input type="hidden" id="recruitEdSeq" name="recruitEdSeq" value="${recruit.seq}" />
+							<td>
+								<input type="date" id="edStartPeriod" name="edStartPeriod" value="${edu.edStartPeriod}"/>
+								~
+								<input type="date" id="edEndPeriod" name="edEndPeriod" value="${edu.edEndPeriod}"/>
+							</td>
+							<td>
+								<select id="division" name="division">
+									<option value="graduation" ${edu.division == 'graduation' ? 'selected' : ''}>졸업</option>
+									<option value="enrolled" ${edu.division == 'enrolled' ? 'selected' : ''}>재학</option>
+									<option value="dropout" ${edu.division == 'dropout' ? 'selected' : ''}>중퇴</option>
+								</select>
+							</td>
+							<td>
+								<input id="schoolName" value="${edu.schoolName}"/>
+								<select id="edLocation" name="edLocation">
+									<option value="서울" ${edu.edLocation == '서울' ? 'selected' : ''}>서울</option>
+									<option value="인천" ${edu.edLocation == '인천' ? '인천' : ''}>인천</option>
+									<option value="부산" ${edu.edLocation == '부산' ? '부산' : ''}>부산</option>
+									<option value="울산" ${edu.edLocation == '울산' ? '울산' : ''}>울산</option>
+									<option value="광주" ${edu.edLocation == '광주' ? '광주' : ''}>광주</option>
+									<option value="대구" ${edu.edLocation == '대구' ? '대구' : ''}>대구</option>
+									<option value="대전" ${edu.edLocation == '대전' ? '대전' : ''}>대전</option>
+								</select>
+							</td>
+							<td><input id="major" name="major" value="${edu.major}"/></td>
+							<td><input id="grade" name="grade" value="${edu.grade}"/></td>
+						</tr>
+					</c:forEach>
+					
+			    </c:otherwise>
+			</c:choose>
 		
 		</table>
 		
@@ -155,24 +193,45 @@
 				<td>부서/직급/직책</td>
 				<td>지역</td>
 			</tr>
-			<c:forEach var="car" items="${career}">
-				<tr data-section="career">
-						<input type="hidden" id="carSeq" name="carSeq" value="${car.carSeq}">
-						<input type="hidden" id="recruitCaSeq" name="recruitCaSeq" value="${car.recruitCaSeq}">
-						<input type="hidden" id="salary" name="salary" value="${car.salary}">		
-						<td>
-							<input type="month" id="caStartPeriod" name="caStartPeriod" value="${car.caStartPeriod}" />
-							~
-							<input type="month" id="caEndPeriod" name="caEndPeriod" value="${car.caEndPeriod}"/>
-						</td>
-						<td>
-							<input id="compName" name="compName" value="${car.compName}"/>
-						</td>
-						<td><input id="task" name="task" value="${car.task}"/></td>
-						<td><input id="caLocation" name="caLocation" value="${car.caLocation}"/></td>
-				</tr>
-			</c:forEach>
-		
+			<c:choose>
+				    <c:when test="${empty career}">
+				        <tr data-section="career">
+				            <input type="hidden" id="carSeq" name="carSeq" value="" />
+				            <input type="hidden" id="recruitCaSeq" name="recruitCaSeq" value="${recruit.seq}" />
+				            <input type="hidden" id="salary" name="salary" value="0" />        
+				            <td><input class="carcheck" type="checkbox" /></td>
+				            <td>
+				                <input type="month" id="caStartPeriod" name="caStartPeriod" value="" />
+				                ~
+				                <input type="month" id="caEndPeriod" name="caEndPeriod" value="" />
+				            </td>
+				            <td>
+				                <input id="compName" name="compName" value="" />
+				            </td>
+				            <td><input id="task" name="task" value=""  placeholder="부서 / 직급 / 직책"//></td>
+				            <td><input id="caLocation" name="caLocation" value="" /></td>
+				        </tr>
+				    </c:when>
+				    <c:otherwise>
+						<c:forEach var="car" items="${career}">
+							<tr data-section="career">
+									<input type="hidden" id="carSeq" name="carSeq" value="${car.carSeq}">
+									<input type="hidden" id="recruitCaSeq" name="recruitCaSeq" value="${car.recruitCaSeq}">
+									<input type="hidden" id="salary" name="salary" value="${car.salary}">		
+									<td>
+										<input type="month" id="caStartPeriod" name="caStartPeriod" value="${car.caStartPeriod}" />
+										~
+										<input type="month" id="caEndPeriod" name="caEndPeriod" value="${car.caEndPeriod}"/>
+									</td>
+									<td>
+										<input id="compName" name="compName" value="${car.compName}"/>
+									</td>
+									<td><input id="task" name="task" value="${car.task}"/></td>
+									<td><input id="caLocation" name="caLocation" value="${car.caLocation}"/></td>
+							</tr>
+						</c:forEach>
+					</c:otherwise>
+			</c:choose>
 		</table>
 		
 		<h2>자격증</h2>
@@ -184,19 +243,41 @@
 				<td>취득일</td>
 				<td>발행처</td>
 			</tr>
-			<c:forEach var="cer" items="${certification}">
-				<tr data-section="certification">
-						<input type="hidden" id="certSeq" name="certSeq" value="${cer.certSeq}">
-						<input type="hidden" id="recruitCeSeq" name="recruitCeSeq" value="${cer.recruitCeSeq}">	
-						<td>
-							<input id="qualifiName" name="qualifiName" value="${cer.qualifiName}"/>
-						</td>
-						<td>
-							<input type="date" id="acquDate" name="acquDate" value="${cer.acquDate}"/>
-						</td>
-						<td><input id="organizeName" name="organizeName" value="${cer.organizeName}"/></td>
-				</tr>
-			</c:forEach>
+			
+			
+			<c:choose>
+			    <c:when test="${empty certification}">
+			        <tr data-section="certification">
+			            <input type="hidden" id="certSeq" name="certSeq" value="" />
+			            <input type="hidden" id="recruitCeSeq" name="recruitCeSeq" value="${recruit.seq}" />    
+			            <td><input class="cercheck" type="checkbox" /></td>
+			            <td>
+			                <input id="qualifiName" name="qualifiName" value="" />
+			            </td>
+			            <td>
+			                <input type="date" id="acquDate" name="acquDate" value="" />
+			            </td>
+			            <td><input id="organizeName" name="organizeName" value="" /></td>
+			        </tr>
+			    </c:when>
+			    <c:otherwise>
+			        <c:forEach var="cer" items="${certification}">
+						<tr data-section="certification">
+								<input type="hidden" id="certSeq" name="certSeq" value="${cer.certSeq}">
+								<input type="hidden" id="recruitCeSeq" name="recruitCeSeq" value="${cer.recruitCeSeq}">	
+								<td>
+									<input id="qualifiName" name="qualifiName" value="${cer.qualifiName}"/>
+								</td>
+								<td>
+									<input type="date" id="acquDate" name="acquDate" value="${cer.acquDate}"/>
+								</td>
+								<td><input id="organizeName" name="organizeName" value="${cer.organizeName}"/></td>
+						</tr>
+					</c:forEach>
+			    </c:otherwise>
+			</c:choose>
+			
+			
 		
 		</table>
 		

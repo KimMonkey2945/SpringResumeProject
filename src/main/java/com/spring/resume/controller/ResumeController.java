@@ -118,7 +118,7 @@ public class ResumeController {
 			String division = period.getDivision();
 			if(schoolName.contains("대학") && division.equals("졸업")) {
 				if(eduPeriod >= 4) {
-					model.addAttribute("eduPeriod", schoolName + "(" + eduPeriod  + "년)" + period.getDivision());
+					model.addAttribute("eduPeriod", schoolName + "(4년)" + period.getDivision());
 				}else {
 					model.addAttribute("eduPeriod", schoolName + "(2-3년)" + period.getDivision());
 				}

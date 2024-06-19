@@ -22,11 +22,19 @@ public class ResumeDAOImpl implements ResumeDAO {
 	private SqlSession sqlSession;
 
 	public int insertResume(ResumeDTO resume) {
-		int result = 0;
-		result += sqlSession.insert("resume.saveRecruit", resume);
-		result += sqlSession.insert("resume.saveEd", resume);
-		result += sqlSession.insert("resume.saveCa", resume);
-		result += sqlSession.insert("resume.saveCe", resume);
+		int result = 1; // 임시
+		if (resume.getRecruit() != null) {
+			sqlSession.insert("resume.saveRecruit", resume);
+	    }
+	    if (resume.getEducation() != null && !resume.getEducation().isEmpty()) {
+	    	sqlSession.insert("resume.saveEd", resume);
+	    }
+	    if (resume.getCareer() != null && !resume.getCareer().isEmpty()) {
+	    	sqlSession.insert("resume.saveCa", resume);
+	    }
+	    if (resume.getCertification() != null && !resume.getCertification().isEmpty()) {
+	        sqlSession.insert("resume.saveCe", resume);
+	    }
 		return result;
 	}
 	
@@ -61,12 +69,19 @@ public class ResumeDAOImpl implements ResumeDAO {
 	}
 
 	public int saveFormUpdate(ResumeDTO resume) {
-		int result = 0;
-		result += sqlSession.update("resume.updateRecruit", resume);
-		result += sqlSession.update("resume.updateEd", resume);
-		result += sqlSession.update("resume.updateCa", resume); 
-		result += sqlSession.update("resume.updateCe", resume);
-	
+		int result = 1; // 임시
+		if (resume.getRecruit() != null) {
+		    sqlSession.update("resume.updateRecruit", resume);
+	    }
+	    if (resume.getEducation() != null && !resume.getEducation().isEmpty()) {
+	        sqlSession.update("resume.updateEd", resume);
+	    }
+	    if (resume.getCareer() != null && !resume.getCareer().isEmpty()) {
+	        sqlSession.update("resume.updateCa", resume);
+	    }
+	    if (resume.getCertification() != null && !resume.getCertification().isEmpty()) {
+	        sqlSession.update("resume.updateCe", resume);
+	    }
 		return result;
 	}
 

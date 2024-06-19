@@ -120,7 +120,7 @@
 		<foreach collection="career" item="car" index="index" separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
 		
 			INTO CAREER (CAR_SEQ, SEQ, COMP_NAME, LOCATION, START_PERIOD, END_PERIOD, TASK, SALARY)
-			VALUES(#{car.carSeq}, #{car.recruitCaSeq}, #{car.compName}, #{car.caLocation}, #{car.caStartPeriod}, #{car.caEndPeriod}, #{car.task}, '회사내규에따름')
+			VALUES(#{car.carSeq}, #{car.recruitCaSeq}, #{car.compName}, #{car.location}, #{car.caLocation}, #{car.caStartPeriod}, #{car.caEndPeriod}, #{car.task}, '회사내규에따름')
 		
 		</foreach>
 		
@@ -179,6 +179,7 @@
 	        ON R.SEQ = ED.SEQ 
 	        WHERE NAME=#{name} AND PHONE=#{phoneNum}
         )
+        ORDER BY END_PERIOD
     </select>
 
     <select id="selectCareer" parameterType="java.util.Map" resultMap="careerVo">
@@ -192,11 +193,12 @@
             ,TASK
             ,SALARY
         FROM (
-	        SELECT CA.SEQ, CA.CAR_SEQ, CA.COMP_NAME, CA.LOCATION, CA.START_PERIOD, CA.END_PERIOD, CA.TASK, CA.SALARY
+	        SELECT CA.SEQ, CA.CAR_SEQ, CA.COMP_NAME, CA.START_PERIOD, CA.END_PERIOD, CA.TASK, CA.SALARY, CA.LOCATION
 	         FROM RECRUIT R 
 	         JOIN CAREER CA ON R.SEQ = CA.SEQ 
 	         WHERE NAME=#{name} AND PHONE=#{phoneNum}
        	 	)
+       	ORDER BY END_PERIOD
     </select>
 
     <select id="selectCertification" parameterType="java.util.Map" resultMap="certificationVo">
@@ -212,6 +214,7 @@
 	         JOIN CERTIFICATE CE ON R.SEQ = CE.SEQ
 	        WHERE NAME=#{name} AND PHONE=#{phoneNum}
         	)
+        ORDER BY ACQU_DATE
     </select>
     
     <!-- seq 불러오기  -->
@@ -268,7 +271,7 @@
 
 	<update id="updateEd" parameterType="com.spring.resume.dto.ResumeDTO">
 	
-		<foreach collection="education" item="edu" separator=" " open="BEGIN" close="END;">
+		<foreach collection="education" item="edu" separator=";" open="DECLARE BEGIN" close="; END;">
 		    MERGE INTO EDUCATION ED
 			USING (SELECT 
 			           #{edu.schoolName} AS SCHOOL_NAME
@@ -293,14 +296,14 @@
 			        ED.LOCATION = D.LOCATION
 			WHEN NOT MATCHED THEN
 			    INSERT (SEQ, EDU_SEQ, SCHOOL_NAME, DIVISION, START_PERIOD, END_PERIOD, MAJOR, GRADE, LOCATION)
-			    VALUES (D.RECRUIT_EDSEQ, D.EDU_SEQ, D.SCHOOL_NAME, D.DIVISION, D.START_PERIOD, D.END_PERIOD, D.MAJOR, D.GRADE, D.LOCATION);
+			    VALUES (D.RECRUIT_EDSEQ, D.EDU_SEQ, D.SCHOOL_NAME, D.DIVISION, D.START_PERIOD, D.END_PERIOD, D.MAJOR, D.GRADE, D.LOCATION)
 		</foreach>
 		
 	</update>
 	
 	<update id="updateCa" parameterType="com.spring.resume.dto.ResumeDTO">
 	
-		<foreach collection="career" item="car" separator=" " open="BEGIN" close="END;">
+		<foreach collection="career" item="car" separator=";" open="DECLARE BEGIN" close="; END;">
 			MERGE INTO CAREER CA
 			USING (SELECT
 						#{car.carSeq} AS CAR_SEQ
@@ -322,15 +325,15 @@
 			        ,CA.TASK = A.TASK
 			        ,CA.SALARY = A.SALARY
 			WHEN NOT MATCHED THEN
-			    INSERT (SEQ, CAR_SEQ, COMP_NAME, START_PERIOD, END_PERIOD, TASK, SALARY)
-			    VALUES (A.SEQ, A.CAR_SEQ, A.COMP_NAME, A.START_PERIOD, A.END_PERIOD, A.TASK, '회사내규에따름');
+			    INSERT (SEQ, CAR_SEQ, COMP_NAME, START_PERIOD, END_PERIOD, TASK, SALARY, LOCATION)
+			    VALUES (A.SEQ, A.CAR_SEQ, A.COMP_NAME, A.START_PERIOD, A.END_PERIOD, A.TASK, '회사내규에따름', A.LOCATION)
 		</foreach>
 		
 	</update>
 	
 	<update id="updateCe" parameterType="com.spring.resume.dto.ResumeDTO">
 		
-		<foreach collection="certification" item="cer" separator=" " open="BEGIN" close="END;">
+		<foreach collection="certification" item="cer" separator=";" open="DECLARE BEGIN" close="; END;">
 			MERGE INTO CERTIFICATE CE
 			USING (SELECT
 						#{cer.certSeq} AS CERT_SEQ
@@ -347,7 +350,7 @@
 			        ,CE.ORGANIZE_NAME = E.ORGANIZE_NAME
 			WHEN NOT MATCHED THEN
 			    INSERT (SEQ, CERT_SEQ, QUALIFI_NAME, ACQU_DATE, ORGANIZE_NAME)
-			    VALUES (E.SEQ, E.CERT_SEQ, E.QUALIFI_NAME, E.ACQU_DATE, E.ORGANIZE_NAME);
+			    VALUES (E.SEQ, E.CERT_SEQ, E.QUALIFI_NAME, E.ACQU_DATE, E.ORGANIZE_NAME)
 		</foreach>	 
 	
 	</update>

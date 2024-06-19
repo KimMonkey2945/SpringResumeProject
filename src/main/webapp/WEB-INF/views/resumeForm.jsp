@@ -42,8 +42,9 @@
 	        return currentYear + '-' + currentMonth;
 	    }
 		
+		var cleaned = "";
 		$('#birth').on('keyup', function(){
-		    var cleaned = this.value.replace(/[^0-9]/g, '');
+		    cleaned = this.value.replace(/[^0-9]/g, '');
 		    cleaned = cleaned.substring(0, 8);
 		    var cleanedMonth = "";
 		    if (cleaned.length >= 4) {
@@ -62,40 +63,28 @@
 		            (parseInt(year) == currentYear && parseInt(month) == currentMonth && parseInt(day) > currentDay)) {
 		            // 입력된 생년월일이 현재 시간보다 미래인 경우 경고 메시지 표시
 		            alert('생년월일은 현재 시간 이전이어야 합니다.');
+		            return;
 		            // 값을 초기화하거나 이전 유효한 값으로 복원할 수 있음
 		            cleaned = '';
 		        } else {
-		            // 월이 1 이상 12 이하의 값이어야 함
-		            if (parseInt(month) > 12) {
-		                month = '12'; // 월이 12보다 크면 최대값인 12로 설정
-		            } else if (month === '00'){
-		            	month = '01';
-		            }
-
-		            // 일이 1 이상 해당 월의 최대 일수 이하의 값이어야 함
-		            var maxDays = new Date(year, month, 0).getDate(); // 해당 월의 마지막 날짜
-		            if (parseInt(day) > maxDays) {
-		                day = maxDays.toString(); // 일이 최대 날짜를 초과하면 최대 날짜로 설정
-		            } else if(day === '00'){
-		            	day = '01';
-		            }
-
 		            cleaned = year + '-' + month + '-' + day;
 		            cleanedMonth = year + '-' + month;
 		        }
 		    }
-		    if(cleaned.length == 10){
-		    	this.value = cleaned;	
-		    }
+// 		    if(cleaned.length == 10){
+// 		    	this.value = cleaned;	
+// 		    }
 		    var currentDateString = getCurrentDateString();
 		    var CurrentDateStringMonth = getCurrentDateStringMonth();
-		    $('#edStartPeriod').attr('min', this.value);
+		    $('#edStartPeriod').attr('min', cleaned);
 		    $('#edStartPeriod').attr('max', currentDateString);
 		    $('#caStartPeriod').attr('min', cleanedMonth);
 		    $('#caStartPeriod').attr('max', CurrentDateStringMonth);
-		    $('#acquDate').attr('min', this.value);
+		    $('#acquDate').attr('min', cleaned);
 		    $('#acquDate').attr('max', currentDateString);
 		});
+		
+		
 		
 		function isValidEmail(email) {
 		    var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
@@ -171,83 +160,130 @@
 		var currentDateString = getCurrentDateString();
 		var birth = $('#birth').val()
 	    $('#acquDate').attr('min', birth); 
-	   	$('#acquDate').attr('max', currentDateString);   
-		
-		$(document).on('change', '#edStartPeriod', function() {
-		    var startDate = $(this).val();
-		    
-		    var $edEndPeriod = $(this).closest('tr').find('#edEndPeriod');    
-		    $edEndPeriod.attr('min', startDate);
-		    
-		    var endDate = $edEndPeriod.val();
-		    if (endDate > startDate) {
-		        $edEndPeriod.val('');
-		    }
-		    
-		    var $edStartPeriod = $(this);
+	   	$('#acquDate').attr('max', currentDateString);
+	   	
+		$(document).on('change', '#edStartPeriod, #edEndPeriod', function() {
 		    var $row = $(this).closest('tr');
-		    var $edEndPeriod = $row.find('#edEndPeriod');
-		    var edStartVal = $edStartPeriod.val();
-		
-		    // 다른 경력의 시작일과 종료일과 비교하여 겹치지 않도록 검사
+		    var startDate = $row.find('#edStartPeriod').val();
+		    var endDate = $row.find('#edEndPeriod').val();
+
+		    // 시작일을 설정하면 해당 행의 종료일의 최소값을 설정
+		    if (this.id === 'edStartPeriod') {
+		        $row.find('#edEndPeriod').attr('min', startDate);
+		    }
+
+		    if (endDate && startDate && endDate < startDate) {
+		        alert('종료일은 시작일 이후여야 합니다.');
+		        $row.find('#edEndPeriod').val('');
+		        return;
+		    }
+
+		    var isOverlap = false;
+
+		    function compareYearMonth(date1, date2) {
+		        var d1 = new Date(date1);
+		        var d2 = new Date(date2);
+		        return (d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth());
+		    }
+
+		    // 학력과의 중복 검사
 		    $('tr').not($row).each(function() {
-		        var $existingEdStart = $(this).find('#edStartPeriod');
-		        var $existingEdEnd = $(this).find('#edEndPeriod');
-		        var existingEdStartVal = $existingEdStart.val();
-		        var existingEdEndVal = $existingEdEnd.val();
-		
-		        if (existingEdEndVal && new Date(edStartVal) < new Date(existingEdEndVal)) {
-		            alert('학력기간을 확인해주세요.');
-		            $edStartPeriod.val('');
-		            return false; // 검사 실패로 중단
-		        }
-		
-		        if (existingEdStartVal && new Date(edStartVal) < new Date(existingEdStartVal)) {
-		            alert('학력기간을 확인해주세요.');
-		            $edStartPeriod.val('');
-		            return false; // 검사 실패로 중단
+		        var existingEdStart = $(this).find('#edStartPeriod').val();
+		        var existingEdEnd = $(this).find('#edEndPeriod').val();
+
+		        if (existingEdStart && existingEdEnd) {
+		            // 새 학력이 기존 학력과 겹치는지 확인
+		            if ((new Date(startDate) >= new Date(existingEdStart) && new Date(startDate) <= new Date(existingEdEnd)) ||
+		                (new Date(endDate) >= new Date(existingEdStart) && new Date(endDate) <= new Date(existingEdEnd)) ||
+		                (new Date(startDate) <= new Date(existingEdStart) && new Date(endDate) >= new Date(existingEdEnd))) {
+		                isOverlap = true;
+		                return false; // 중단
+		            }
 		        }
 		    });
-		    
-		});
-		
-		$(document).on('change', '#caStartPeriod', function() {
-		    var startDate = $(this).val();
-		    
-		    var $caEndPeriod = $(this).closest('tr').find('#caEndPeriod');    
-		    $caEndPeriod.attr('min', startDate);
-		    
-		    var endDate = $caEndPeriod.val();
-		    if (endDate > startDate) {
-		        $caEndPeriod.val('');
-		    }
-		    
-		    var $caStartPeriod = $(this);
-		    var $row = $(this).closest('tr');
-		    var $caEndPeriod = $row.find('#caEndPeriod');
-		    var caStartVal = $caStartPeriod.val();
-		
-		    // 다른 경력의 시작일과 종료일과 비교하여 겹치지 않도록 검사
-		    $('tr').not($row).each(function() {
-		        var $existingCaStart = $(this).find('#caStartPeriod');
-		        var $existingCaEnd = $(this).find('#caEndPeriod');
-		        var existingCaStartVal = $existingCaStart.val();
-		        var existingCaEndVal = $existingCaEnd.val();
-		
-		        if (existingCaEndVal && new Date(caStartVal) < new Date(existingCaEndVal)) {
-		            alert('새로 추가된 경력의 시작일은 다른 경력의 종료일 이후여야 합니다.');
-		            $caStartPeriod.val('');
-		            return false; // 검사 실패로 중단
-		        }
-		
-		        if (existingCaStartVal && new Date(caStartVal) < new Date(existingCaStartVal)) {
-		            alert('새로 추가된 경력의 시작일은 다른 경력의 시작일 이후여야 합니다.');
-		            $caStartPeriod.val('');
-		            return false; // 검사 실패로 중단
+
+		    // 경력과의 중복 검사
+		    $('tr[data-section="career"]').each(function() {
+		        var caStart = $(this).find('#caStartPeriod').val();
+		        var caEnd = $(this).find('#caEndPeriod').val();
+
+		        if (caStart && caEnd) {
+		            // 새 경력과 학력이 겹치는지 확인 (년도와 월까지만 비교)
+		            if (compareYearMonth(startDate, caStart) || compareYearMonth(endDate, caEnd) ||
+		                (new Date(startDate) <= new Date(caStart) && new Date(endDate) >= new Date(caEnd))) {
+		                isOverlap = true;
+		                return false; // 중단
+		            }
 		        }
 		    });
-		    
+
+		    if (isOverlap) {
+		        alert('경력 기간이 기존 경력 또는 학력 기간과 겹칩니다.');
+		        $(this).val(''); // 겹치는 경우 현재 입력한 값을 초기화
+		    }
 		});
+
+		
+
+		$(document).on('change', '#caStartPeriod, #caEndPeriod', function() {
+			    var $row = $(this).closest('tr');
+			    var startDate = $row.find('#caStartPeriod').val();
+			    var endDate = $row.find('#caEndPeriod').val();
+			
+			    // 시작일을 설정하면 해당 행의 종료일의 최소값을 설정
+			    if (this.id === 'caStartPeriod') {
+			        $row.find('#caEndPeriod').attr('min', startDate);
+			    }
+			
+			    if (endDate && startDate && endDate < startDate) {
+			        alert('종료일은 시작일 이후여야 합니다.');
+			        $row.find('#caEndPeriod').val('');
+			        return;
+			    }
+			
+			    var isOverlap = false;
+			
+			    function compareYearMonth(date1, date2) {
+			        var d1 = new Date(date1);
+			        var d2 = new Date(date2);
+			        return (d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth());
+			    }
+			
+			    // 경력과의 중복 검사
+			    $('tr[data-section="career"]').not($row).each(function() {
+			        var existingCaStart = $(this).find('#caStartPeriod').val();
+			        var existingCaEnd = $(this).find('#caEndPeriod').val();
+			
+			        if (existingCaStart && existingCaEnd) {
+			            // 새 경력이 기존 경력과 겹치는지 확인
+			            if (compareYearMonth(startDate, existingCaStart) || compareYearMonth(endDate, existingCaEnd) || 
+			                (new Date(startDate) <= new Date(existingCaStart) && new Date(endDate) >= new Date(existingCaEnd))) {
+			                isOverlap = true;
+			                return false; // 중단
+			            }
+			        }
+			    });
+			
+			    // 학력과의 중복 검사
+			    $('tr[data-section="education"]').each(function() {
+			        var eduStart = $(this).find('#edStartPeriod').val();
+			        var eduEnd = $(this).find('#edEndPeriod').val();
+			
+			        if (eduStart && eduEnd) {
+			            // 새 경력과 학력이 겹치는지 확인
+			            if (compareYearMonth(startDate, eduStart) || compareYearMonth(endDate, eduEnd) || 
+			                (new Date(startDate) <= new Date(eduStart) && new Date(endDate) >= new Date(eduEnd))) {
+			                isOverlap = true;
+			                return false; // 중단
+			            }
+			        }
+			    });
+			
+			    if (isOverlap) {
+			        alert('경력 기간이 기존 경력 또는 학력 기간과 겹칩니다.');
+			        $(this).val(''); // 겹치는 경우 현재 입력한 값을 초기화
+			    }
+			});
 	
 		
 		jQuery.fn.serializeAll = function(){
@@ -266,6 +302,7 @@
 	                var element = $(this);
 	                var id = element.attr('id');
 	                var value = element.val();
+	                
 	                obj.recruit[id] = value;
 	            });
 	        });
@@ -273,22 +310,30 @@
 	        var eduSeqCounter = $('#eduSeq').val();
 	        this.find('tr[data-section="education"]').each(function(){
 	            var eduObj = {};
+	            var allFieldsValid = true;
 	            $(this).find('input:not(.educheck_):not(.educheck), select').each(function(){
 	                var element = $(this);
 	                var id = element.attr('id');
 	                var value = element.val();
+	                
 	                if (id === 'eduSeq') {
 	                    value = ++eduSeqCounter;
 	                    eduSeqCounter++;  
 	                }
+	                if(value == '' || value == null){
+	                	allFieldsValid = false;
+	                }
 	                eduObj[id] = value;
 	            });
-	            obj.education.push(eduObj);
+	            if(allFieldsValid){
+	            	obj.education.push(eduObj);	
+	            }
 	        });
 			
 	        var carSeqCounter = $('#carSeq').val();
 	        this.find('tr[data-section="career"]').each(function(){
 	            var carObj = {};
+	            var allFieldsValid = true;
 	            $(this).find('input:not(.carcheck_):not(.carcheck), select').each(function(){
 	                var element = $(this);
 	                var id = element.attr('id');
@@ -297,14 +342,20 @@
 	                	value = ++carSeqCounter;
 	                    carSeqCounter++;  
 	                }
+	                if(value == '' || value == null){
+	                	allFieldsValid = false;
+	                }
 	                carObj[id] = value;
 	            });
-	            obj.career.push(carObj);
-	        });
+	            if(allFieldsValid){
+	            	obj.career.push(carObj);
+	            }
+	       	});
 			
 	        var cerSeqCounter = $('#certSeq').val();
 	        this.find('tr[data-section="certification"]').each(function(){
 	            var certObj = {};
+	            var allFieldsValid = true;
 	            $(this).find('input:not(.cercheck_):not(.cercheck), select').each(function(){
 	                var element = $(this);
 	                var id = element.attr('id');
@@ -313,10 +364,14 @@
 	                	value = ++cerSeqCounter;
 	                    cerSeqCounter++;  
 	                }
+	                if(value == '' || value == null){
+	                	allFieldsValid = false;
+	                }
 	                certObj[id] = value;
 	            });
-	            obj.certification.push(certObj);
-
+	            if(allFieldsValid){
+	            	obj.certification.push(certObj);
+	            }
 	        });
 
 			    return obj;
@@ -346,25 +401,29 @@
 		    var isValid = true; // 유효성 검사 결과를 저장할 변수
 
 		    $('#eduTable input[name="edStartPeriod"]').each(function() {
-		        var $edStartPeriod = $(this);
+		    	var $edStartPeriod = $(this);
 		        var $row = $edStartPeriod.closest('tr');
 		        var birth = $('#birth').val();
+		        var birthDate = '';
+
+		        if (birth !== '') {
+		            // birth를 yyyy-mm-dd 형식으로 변환
+		            var year = birth.substring(0, 4);
+		            var month = birth.substring(4, 6);
+		            var day = birth.substring(6, 8);
+		            birthDate = new Date(year + '-' + month + '-' + day);
+		        } else {
+		            birthDate = new Date(cleaned);
+		        }
 
 		        if ($edStartPeriod.val() !== '') {
-		            if ($row.find('#edEndPeriod').val() === '') {
-		                alert('재학기간을 입력해주세요.');
+		            var edStartDate = new Date($edStartPeriod.val());
+		            if (edStartDate < birthDate) {
+		                alert('재학기간을 확인해주세요.');
 		                isValid = false;
-		                $row.find('#edEndPeriod').focus();
-		                return false; // each 함수를 종료하기 위해 false 반환
-		                if($row.find('#edEndPeriod').val() > birth){
-		                	alert('재학기간을 입력해주세요.');
-		                }
+		                $('#edStartPeriod').focus();
 		            }
-		        if($edStartPeriod.val() < birth){
-		        	alert('재학기간을 확인해주세요.');
-	                isValid = false;
-	                $('#edStartPeriod').focus();
-		        }
+			        
 	            if ($row.find('#schoolName').val() === '') {
 	                alert('학교이름을 입력해주세요.');
 	                isValid = false;
@@ -381,6 +440,15 @@
 	                alert('학점을 입력해주세요.');
 	                isValid = false;
 	                $row.find('#grade').focus();
+	                return false; 
+	            }
+	            var edStartDate = new Date($row.find('#edStartPeriod').val());
+	            var edEndDate = new Date($row.find('#edEndPeriod').val());
+	            
+	            if(edStartDate > edEndDate){
+	            	alert("재학기간을 확인해주세요.")
+	            	isValid = false;
+	                $row.find('#edEndPeriod').focus();
 	                return false; 
 	            }
 	        }
@@ -449,6 +517,7 @@
 		        var $qualifiName = $(this);
 		        var $row = $qualifiName.closest('tr');
 		        var birth = $('#birth').val();
+		        var birthDate = new Date(birth); 
 
 		        if ($qualifiName.val() !== '') {
 		            if ($row.find('#acquDate').val() === '') {
@@ -457,8 +526,10 @@
 		                $row.find('#acquDate').focus();
 		                return false; // each 함수를 종료하기 위해 false 반환
 		            }
-		            if($row.find('#acquDate').val() < birth){
+		            var acDate = new Date($row.find('#acquDate').val());
+		            if(acDate < birthDate){
 		            	alert('취득일을 확인해주세요.');
+		            	$row.find('#acquDate').focus();
 		                isValid = false;
 		            }
 		            if ($row.find('#organizeName').val() === '') {
@@ -512,11 +583,29 @@
 	 	        return false;
 	 	    }
 	 		var birth = $('#birth').val();
-	 	    if (birth.length !== 10) {
-	 	    	alert('생년월일을 다시 입력해주세요 ex) 1999-01-01');
+	 	    if (birth.length < 8 || birth.length > 8) {
+	 	    	alert('생년월일을 다시 입력해주세요 ex) 19990101');
 	 	    	$('#birth').focus();
 				return;
 	 	    }
+	 	    
+	 	   if (birth.length == 8) {
+	 	      var year = parseInt(birth.substring(0, 4), 10);
+	 	      var month = parseInt(birth.substring(4, 6), 10);
+	 	      var day = parseInt(birth.substring(6, 8), 10);
+
+	 	      // 날짜 유효성 검사
+	 	      if (isNaN(year) || isNaN(month) || isNaN(day) ||
+	 	          month < 1 || month > 12 || // 월이 1부터 12 사이여야 함
+	 	          day < 1 || day > 31 ||     // 일이 1부터 31 사이여야 함 (달에 따라 다를 수 있음)
+	 	          (month === 4 || month === 6 || month === 9 || month === 11) && day > 30 || // 30일까지 있는 달
+	 	          (month === 2 && (day > 29 || (day > 28 && !((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0)))) // 윤년 계산
+	 	      ) {
+	 	          alert('정확한 생년월일을 입력해주세요.');
+	 	          $('#birth').focus();
+	 	          return;
+	 	      }
+		   }
 	 		
 	 		if (isValidEmail($('#email').val())) {
 	  		}else {
@@ -524,6 +613,12 @@
   		     $('#email').focus()
   		       return; 
 	  		}
+	 		
+            if (!/^[0-9.]+$/.test($('#grade').val())) {
+                alert('학점을 확인해주세요.');
+                $('#grade').focus()
+                return false;
+            }
 			
 			var name = $('#name').val();
 			var phone = $('#phone').val();
@@ -587,11 +682,34 @@
 	 			$('#edStartPeriod').focus();
 	 			return false;
 	 		}
+	 		
 	 	    var birth = $('#birth').val();
-	 	    if (birth.length !== 10) {
-	 	        alert('생년월일을 다시 입력해주세요 ex) 1999-01-01');
+	 		console.log("birth : ", birth);
+	 	    if (birth.length < 8 || birth.length > 8) {
+	 	        alert('생년월일을 다시 입력해주세요 ex) 19990101');
 				return;
 	 	    }
+	 	    
+	 		var year = parseInt(cleanded.substring(0, 4), 10);
+	 	    var month = parseInt(cleanded.substring(4, 6), 10);
+	 	    var day = parseInt(cleanded.substring(6, 8), 10);
+
+	 	    // 날짜 유효성 검사
+	 	    if (isNaN(year) || isNaN(month) || isNaN(day) ||
+	 	        month < 1 || month > 12 || // 월이 1부터 12 사이여야 함
+	 	        day < 1 || day > 31 ||     // 일이 1부터 31 사이여야 함 (달에 따라 다를 수 있음)
+	 	        (month === 4 || month === 6 || month === 9 || month === 11) && day > 30 || // 30일까지 있는 달
+	 	        (month === 2 && (day > 29 || (day > 28 && !((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0)))) // 윤년 계산
+	 	    ) {
+	 	    	alert('월은 최대 12, 일은 최대31까지 가능합니다.');
+	 	    	$('#birth').focus();
+	 	        return;
+	 	    }	    
+	 	    
+            if (!/^[0-9.]+$/.test($('#grade').val())) {
+                alert('학점을 확인해주세요.');
+                return false;
+            }
 
 			if (!validateEduTableInputs()) {
 	 	        return false;
@@ -676,13 +794,11 @@
 			
 			$('#eduTable').append(str);
 			
-			 var currentDateString = getCurrentDateString();
-		     var birth = $('#birth').val();
-//	 	        console.log(birth);
+			var currentDateString = getCurrentDateString();
 
-	        $('.edStartPeriod:last').attr('min', birth);
-	        $('.edStartPeriod:last').attr('max', currentDateString);
-	        $('.edEndPeriod:last').attr('max', currentDateString);
+	        $('.edStartPeriod').attr('min', cleaned);
+	        $('.edStartPeriod').attr('max', currentDateString);
+	        $('.edEndPeriod').attr('max', currentDateString);
 		 		
 		});
 		
@@ -691,6 +807,7 @@
 			str +=	"<tr data-section='career'>"
 			str += "<input type='hidden' id='carSeq' name='carSeq' value='${seq.carSeq}'>"
 			str += "<input type='hidden' id='recruitCaSeq' name='recruitCaSeq' value='" + recruitSeq + "' />" 
+			str += "<input type='hidden' id='salary' name='salary' value='0'>"
 			str +=		"<td><input class='carcheck_' type='checkbox'/></td>"
 			str +=		"<td>"
 			str +=			"<input type='month' class='caStartPeriod' id='caStartPeriod' name='caStartPeriod' />"
@@ -712,9 +829,9 @@
 		       var eduEnd = $('#edEndPeriod').val();
 //	 	        console.log(birth);
 
-		        $('.caStartPeriod:last').attr('min', eduEnd);
-		        $('.caStartPeriod:last').attr('max', currentDateStringMonth);
-		        $('.caEndPeriod:last').attr('max', currentDateStringMonth);
+		        $('.caStartPeriod').attr('min', eduEnd);
+		        $('.caStartPeriod').attr('max', currentDateStringMonth);
+		        $('.caEndPeriod').attr('max', currentDateStringMonth);
 			
 		});
 		
@@ -736,11 +853,11 @@
 			str +=	"</tr>"
 			
 			$('#cerTable').append(str);
+		    var birth = $('#birth').val();
 			
-			var currentDateString = getCurrentDateString();
-	        var birth = $('#birth').val();			
-	        $('.acquDate:last').attr('min', birth);
-	        $('.acquDate:last').attr('max', currentDateString);
+			var currentDateString = getCurrentDateString();		
+	        $('.acquDate').attr('min', cleaned);
+	        $('.acquDate').attr('max', currentDateString);
 			
 		});
 					
@@ -877,7 +994,7 @@
 			<tr data-section="career">
 				<input type="hidden" id="carSeq" name="carSeq" value="${seq.carSeq}">
 				<input type="hidden" id="recruitCaSeq" name="recruitCaSeq"value="">	
-				<input type="hidden" id="salary" name="salary"value="">	
+				<input type="hidden" id="salary" name="salary"value="0">	
 				<td><input class="carcheck" type="checkbox"/></td>
 				<td>
 					<input type="month" id="caStartPeriod" name="caStartPeriod" />
