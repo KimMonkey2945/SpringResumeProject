@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.spring.resume.controller.ResumeController;
 import com.spring.resume.dto.ResumeDTO;
 import com.spring.resume.vo.CareerVo;
 import com.spring.resume.vo.CertificationVo;
@@ -17,6 +19,8 @@ import com.spring.resume.vo.SeqVo;
 
 @Repository
 public class ResumeDAOImpl implements ResumeDAO {
+	
+	 private static final Logger logger = Logger.getLogger(ResumeDAOImpl.class);
 
 	@Autowired
 	private SqlSession sqlSession;

@@ -107,9 +107,11 @@ public class ResumeController {
 		requestData.put("phoneNum", phoneNum);
 		
 		ResumeDTO saveData = resumeService.selectSaveResume(requestData);
-		
 		PeriodVo period = resumeService.selectPeriod(requestData);
-//		logger.info(period);
+		logger.info("period.getEduPeriod() : " + period.getEduPeriod());
+		logger.info("period.getCarPeriod() : " + period.getCarPeriod());
+		logger.info("period.getDivision() : " + period.getDivision());
+		logger.info("period.getSchoolName() : " + period.getSchoolName());
 
 		if(period != null && period.getEduPeriod() != null) {
 			int eduPeriod =  (int)Math.floor(Double.parseDouble(period.getEduPeriod()));
@@ -141,6 +143,10 @@ public class ResumeController {
 		
 		
 		SeqVo seq = resumeService.selectSeq();
+		logger.info("seq.getCarSeq() : " + seq.getCarSeq());
+		logger.info("seq.getCertSeq() : " + seq.getCertSeq());
+		logger.info("seq.getEduSeq() : " + seq.getEduSeq());
+		
 		model.addAttribute("seq", seq);
 		model.addAttribute("recruit", saveData.getRecruit());
         model.addAttribute("education", saveData.getEducation());
