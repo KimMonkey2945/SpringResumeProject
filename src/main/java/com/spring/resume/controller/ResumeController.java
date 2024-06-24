@@ -136,7 +136,7 @@ public class ResumeController {
 				int month = (carPeriod % 12);
 				model.addAttribute("carPeriod", year +"년 " + month+"개월");
 			}else {
-				int month = (carPeriod / 12);
+				int month = (carPeriod % 12);
 				model.addAttribute("carPeriod", month +"개월");
 			}
 		}

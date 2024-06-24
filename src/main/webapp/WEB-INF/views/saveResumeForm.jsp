@@ -12,9 +12,9 @@
 	$(function(){
 		// 각각 seq에 recruitSeq를 넣어준다.
 	    var recruitSeq = $('#seq').val();
-	    var eduSeq = parseInt($('#maxEdSeq').val());
-	    var carSeq = parseInt($('#maxCaSeq').val());
-	    var certSeq = parseInt($('#maxCeSeq').val());
+	    var eduSeq = parseInt($('#maxEdSeq').val()) + 1;
+	    var carSeq = parseInt($('#maxCaSeq').val()) + 1;
+	    var certSeq = parseInt($('#maxCeSeq').val()) + 1;
 	    
 	    console.log('처음 " ', eduSeq);
 	    console.log('처음 " ', carSeq);
@@ -574,6 +574,11 @@
 		                    var existingEnd = new Date($(this).find(section + 'EndPeriod').val());
 
 		                    if (!isNaN(existingStart) && !isNaN(existingEnd)) {
+		                        // 시작일과 종료일이 모두 같은 경우 중복으로 처리
+		                        if (caStartDate.getTime() === existingStart.getTime() && caEndDate.getTime() === existingEnd.getTime()) {
+		                            isOverlap = true;
+		                            return false; // 중단
+		                        }
 		                        // 시작일과 종료일이 정확히 일치하는 경우는 중복으로 보지 않음
 		                        if ((caStartDate <= existingEnd && caEndDate >= existingStart) &&
 		                            !(caStartDate.getMonth() === existingEnd.getMonth() && caStartDate.getFullYear() === existingEnd.getFullYear()) &&
@@ -582,6 +587,7 @@
 		                            return false; // 중단
 		                        }
 		                    }
+
 		                });
 		                return isOverlap;
 		            }
@@ -694,6 +700,11 @@
 		                    var existingEnd = new Date($(this).find(section + 'EndPeriod').val());
 
 		                    if (!isNaN(existingStart) && !isNaN(existingEnd)) {
+		                        // 시작일과 종료일이 모두 같은 경우 중복으로 처리
+		                        if (edStartDate.getTime() === existingStart.getTime() && edEndDate.getTime() === existingEnd.getTime()) {
+		                            isOverlap = true;
+		                            return false; // 중단
+		                        }
 		                        // 시작일과 종료일이 정확히 일치하는 경우는 중복으로 보지 않음
 		                        if ((edStartDate <= existingEnd && edEndDate >= existingStart) &&
 		                            !(edStartDate.getMonth() === existingEnd.getMonth() && edStartDate.getFullYear() === existingEnd.getFullYear()) &&
@@ -702,6 +713,7 @@
 		                            return false; // 중단
 		                        }
 		                    }
+
 		                });
 		                return isOverlap;
 		            }
@@ -1045,7 +1057,7 @@
 		var newCarSeq = 0;
 		$('#carAdd').on('click', function(){
 			if(newCarSeq == 0){
-				newCarSeq = carSeq + 1;
+				newCarSeq = carSeq + 2;
 			}
 			var str = '';
 			str +=	"<tr data-section='career'>"
@@ -1079,10 +1091,10 @@
 	        newCarSeq++;	        
 		});
 		
-		var newCarSeq = 0;
+		var newCertSeq = 0;
 		$('#cerAdd').on('click', function(){	
-			if(newCertSeq == 0){			
-			newCertSeq = certSeq + 1;
+			if(newCertSeq == 0){
+			newCertSeq = certSeq + 2;
 			}
 			
 			var str = '';

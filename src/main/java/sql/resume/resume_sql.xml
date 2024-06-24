@@ -229,37 +229,65 @@
     
     <!-- 기간계산하는  -->
     <select id="selectPeriod" parameterType="java.util.Map" resultType="com.spring.resume.vo.PeriodVo">
-				SELECT 
-				    MONTHS_BETWEEN(TO_DATE(MAX(ED.END_PERIOD), 'YYYY-MM-DD'), TO_DATE(MAX(ED.START_PERIOD), 'YYYY-MM-DD')) AS EDUPERIOD,
-				    NVL( 
-				       (SELECT 
-				             SUM(MONTHS_BETWEEN(TO_DATE(CA.END_PERIOD, 'YYYY-MM'), TO_DATE(CA.START_PERIOD, 'YYYY-MM')) + 1)
-				         FROM CAREER CA
-				         JOIN RECRUIT R2 ON CA.SEQ = R2.SEQ
-				         WHERE R2.NAME = #{name} AND R2.PHONE = #{phoneNum}
-				        )
-				        - 
-				        (SELECT COUNT(*) 
-				         FROM (
-				             SELECT CA1.START_PERIOD, CA2.END_PERIOD
-				             FROM CAREER CA1
-				             JOIN CAREER CA2 ON CA1.START_PERIOD = CA2.END_PERIOD
-				             JOIN RECRUIT R3 ON CA1.SEQ = R3.SEQ
-				             WHERE R3.NAME = #{name} AND R3.PHONE = #{phoneNum}
-				         )
-				    ), '0') AS CARPERIOD,
-				    ED.DIVISION AS DIVISION,
-				    ED.SCHOOL_NAME AS SCHOOLNAME
-				FROM RECRUIT R
-				JOIN EDUCATION ED ON R.SEQ = ED.SEQ
-				WHERE R.NAME = #{name} AND R.PHONE = #{phoneNum}
-				AND ED.END_PERIOD = (
-				    SELECT MAX(ED2.END_PERIOD)
-				    FROM EDUCATION ED2
-				    WHERE ED2.SEQ = ED.SEQ
-				)
-				GROUP BY ED.DIVISION, ED.SCHOOL_NAME, ED.START_PERIOD, ED.END_PERIOD, R.SEQ
-				FETCH FIRST 1 ROWS ONLY
+		 <![CDATA[
+		     SELECT 
+		            MONTHS_BETWEEN(TO_DATE(MAX(ED.END_PERIOD), 'YYYY-MM-DD'), TO_DATE(MAX(ED.START_PERIOD), 'YYYY-MM-DD')) AS EDUPERIOD,
+		            NVL(
+		                CASE
+		                    WHEN (
+		                        (SELECT 
+		                            SUM(MONTHS_BETWEEN(TO_DATE(CA.END_PERIOD, 'YYYY-MM'), TO_DATE(CA.START_PERIOD, 'YYYY-MM')) + 1)
+		                        FROM CAREER CA
+		                        JOIN RECRUIT R2 ON CA.SEQ = R2.SEQ
+		                        WHERE R2.NAME = #{name} AND R2.PHONE = '010-3333-3333'
+		                        )
+		                        - 
+		                        (SELECT COUNT(*) 
+		                        FROM (
+		                            SELECT CA1.START_PERIOD, CA1.END_PERIOD
+		                            FROM CAREER CA1
+		                            JOIN RECRUIT R3 ON CA1.SEQ = R3.SEQ
+		                            WHERE R3.NAME = #{name} AND R3.PHONE = #{phoneNum}
+		                        ))
+		                    ) < 1
+		                    THEN 1
+		                    ELSE (
+		                        (SELECT 
+		                            SUM(MONTHS_BETWEEN(TO_DATE(CA.END_PERIOD, 'YYYY-MM'), TO_DATE(CA.START_PERIOD, 'YYYY-MM')) + 1)
+		                        FROM CAREER CA
+		                        JOIN RECRUIT R2 ON CA.SEQ = R2.SEQ
+		                        WHERE R2.NAME = #{name} AND R2.PHONE = #{phoneNum}
+		                        )
+		                        - 
+		                        (SELECT (COUNT(*)) 
+		                        FROM(
+		                        SELECT START_PERIOD, END_PERIOD
+		                        FROM (
+		                            SELECT CA1.START_PERIOD, CA1.END_PERIOD,
+		                                   ROW_NUMBER() OVER (PARTITION BY CA1.START_PERIOD ORDER BY CA1.START_PERIOD) AS rn
+		                            FROM CAREER CA1
+		                            JOIN RECRUIT R3 ON CA1.SEQ = R3.SEQ
+		                            JOIN CAREER CA2 ON CA1.SEQ = CA2.SEQ
+		                                           AND CA1.END_PERIOD = CA2.START_PERIOD
+		                            WHERE R3.NAME = '한글한글' AND R3.PHONE = '010-3333-3333'
+		                        )
+		                        WHERE rn = 1))
+		                    )
+		                END, 0
+		            ) AS CARPERIOD,
+		            ED.DIVISION AS DIVISION,
+		            ED.SCHOOL_NAME AS SCHOOLNAME
+		        FROM RECRUIT R
+		        JOIN EDUCATION ED ON R.SEQ = ED.SEQ
+		        WHERE R.NAME = #{name} AND R.PHONE = #{phoneNum}
+		        AND ED.END_PERIOD = (
+		            SELECT MAX(ED2.END_PERIOD)
+		            FROM EDUCATION ED2
+		            WHERE ED2.SEQ = ED.SEQ
+		        )
+		        GROUP BY ED.DIVISION, ED.SCHOOL_NAME, ED.START_PERIOD, ED.END_PERIOD, R.SEQ
+		        FETCH FIRST 1 ROWS ONLY
+    	]]>
 
     </select>
     
